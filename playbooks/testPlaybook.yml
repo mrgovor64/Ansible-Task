@@ -1,0 +1,6 @@
+---
+- name: Server Preparation
+  hosts: all
+  become: true
+  roles:
+    - cpu_info

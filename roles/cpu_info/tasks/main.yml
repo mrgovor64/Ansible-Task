@@ -1,0 +1,39 @@
+---
+- name: Gather CPU information
+  command: lscpu
+  register: cpu_info
+  changed_when: false
+
+- name: Display CPU information
+  debug:
+    msg: "{{ cpu_info.stdout_lines }}"
+
+- name: Check if SMT file exists
+  stat:
+    path: /sys/devices/system/cpu/smt/active1
+  register: smt_file
+
+- block:
+    - name: Get SMT status
+      command: cat /sys/devices/system/cpu/smt/active
+      register: smt_status
+      changed_when: false
+
+    - name: Display Hyper-Threading / SMT status
+      debug:
+        msg: "Hyper-Threading / SMT is {{ 'enabled' if smt_status.stdout == '1' else 'disabled' }}"
+  when: smt_file.stat.exists
+
+- name: SMT status file is missing
+  debug:
+    msg:
+      - "Error: The file /sys/devices/system/cpu/smt/active is missing!"
+      - "Possible reasons:"
+      - "- Your CPU does not support SMT / Hyper-Threading."
+      - "- SMT is disabled in the BIOS/UEFI settings."
+      - "- The Linux kernel does not support SMT control."
+      - "- The system was booted with the `nosmt` kernel parameter."
+      - "- Insufficient permissions."
+  when: not smt_file.stat.exists
+  failed_when: not smt_file.stat.exists
+  ignore_errors: true
