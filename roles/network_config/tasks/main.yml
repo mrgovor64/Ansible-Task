@@ -9,6 +9,12 @@
   set_fact:
     net_interface: "{{ detected_interface.stdout }}"
 
+# Compare current name and new one
+- name: Compare current name and new one
+  fail:
+    msg: "Name of net_interface already has been updated"
+  when: detected_interface.stdout == new_name_net_interface
+
 # Update and apply network configuration
 - name: Update and apply network configuration
   include_tasks: update_and_apply_config.yml
