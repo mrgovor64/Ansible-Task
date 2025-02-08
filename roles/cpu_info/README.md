@@ -66,3 +66,9 @@ fatal: [server1]: FAILED! => {
 - Run the role with `become: true` to access system-level files.
 - Ensure the system has proper permissions to access `/sys/devices/system/cpu/smt/active`.
 - Some older CPUs or custom Linux kernels might not support SMT/Hyper-Threading or lack the corresponding file.
+
+## Author
+Maintained by Vladimir Govorukhin
+
+## License
+MIT License
