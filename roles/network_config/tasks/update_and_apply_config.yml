@@ -1,0 +1,26 @@
+---
+# Initialize flag
+- name: Initialize a flag for successful configuration
+  set_fact:
+    network_config_applied: false
+
+# Ubuntu 18.04+ :
+- block:
+    - name: Update Netplan configuration
+      template:
+        src: netplan.yaml.j2
+        dest: /etc/netplan/50-cloud-init.yaml
+    - name: Apply Netplan safely
+      command: netplan apply
+    - name: Mark configuration as applied
+      set_fact:
+        network_config_applied: true
+  when: >
+    ansible_distribution == "Ubuntu" and
+    ansible_distribution_version is version('18.04', '>=')
+
+# Check the flag of successful configuration
+- name: Fail if no network configuration was applied
+  fail:
+    msg: "No matching network configuration found for this OS. Role execution failed."
+  when: not network_config_applied

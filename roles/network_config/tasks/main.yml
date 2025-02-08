@@ -1,0 +1,29 @@
+---
+# Detect active network interface
+- name: Detect active network interface
+  shell: "ip route | grep default | awk '{print $5}'"
+  register: detected_interface
+  changed_when: false
+
+- name: Set detected interface as variable
+  set_fact:
+    net_interface: "{{ detected_interface.stdout }}"
+
+# Update and apply network configuration
+- name: Update and apply network configuration
+  include_tasks: update_and_apply_config.yml
+
+# Display new network interface information
+- name: Display new network interface information
+  command: ip addr show {{ new_name_net_interface }}
+  register: net0_info
+  changed_when: false
+
+- name: Output renamed interface info
+  debug:
+    msg: "{{ net0_info.stdout_lines }}"
+
+# Mark for reboot
+- name: Mark system for reboot
+  set_fact:
+    reboot_required: true
