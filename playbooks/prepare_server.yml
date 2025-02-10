@@ -1,0 +1,30 @@
+---
+- name: Server Preparation
+  hosts: all
+  become: true
+  vars:
+    global_reboot_required: false
+    roles_all: []
+    roles_failed: []
+  roles:
+    # - encrypt_disk
+    - cpu_config
+    # - cpu_info
+    # - network_config
+
+  post_tasks:
+    - name: Reboot the server if required
+      reboot:
+        reboot_timeout: 300
+      when: global_reboot_required | bool
+
+    - name: Generate roles_succesful
+      set_fact:
+        roles_succesful: "{{ roles_all | difference(roles_failed) }}"
+      no_log: true
+
+    - name: Show summary of executed roles
+      debug:
+        msg:
+          - "Successful Roles: {{ roles_succesful | join(', ') if roles_succesful else 'None' }}"
+          - "Failed Roles: {{ roles_failed | join(', ') if roles_failed else 'None' }}"

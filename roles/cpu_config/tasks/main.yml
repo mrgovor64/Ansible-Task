@@ -1,0 +1,61 @@
+---
+# Init of roles list
+- name: Adding role to roles list
+  set_fact:
+    roles_all: "{{ roles_all + ['cpu_config: Frequency scaling', 'cpu_config: Disable C-states'] }}"
+
+# Frequency scaling
+- name: Frequency scaling
+  block:
+    - name: Check if CPU supports frequency scaling
+      stat:
+        path: /sys/devices/system/cpu/cpu0/cpufreq
+      register: cpufreq_path
+
+    - name: Fail if CPU frequency scaling is not supported
+      fail:
+        msg: "/sys/devices/system/cpu/cpu0/cpufreq wasn't found, it means CPU frequency scaling is not supported on this system."
+      when: not cpufreq_path.stat.exists
+
+    - name: Ensure CPU governor is set to performance (permanent, udev)
+      copy:
+        dest: /etc/udev/rules.d/99-performance-governor.rules
+        content: |
+          ACTION=="add", SUBSYSTEM=="cpu", KERNEL=="cpu[0-9]*", ATTR{cpufreq/scaling_governor}="performance"
+        mode: "0644"
+
+    - name: Reload udev rules
+      command: udevadm control --reload-rules && udevadm trigger
+
+    # Mark system for reboot
+    - name: Mark system for reboot
+      set_fact:
+        global_reboot_required: true
+
+  rescue:
+    - name: Add role to roles_failed
+      set_fact:
+        roles_failed: "{{ roles_failed + ['cpu_config: Frequency scaling'] }}"
+
+# Disable C-states
+- name: Disable C-states
+  block:
+    - name: Disable C-states permanently
+      replace:
+        path: /etc/default/grub
+        regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=")([^"]*)"'
+        replace: '\1\2 intel_idle.max_cstate=0 processor.max_cstate=0"'
+
+    - name: Update GRUB configuration
+      command: update-grub
+      when: ansible_os_family == "Debian"
+
+    # Mark system for reboot
+    - name: Mark system for reboot
+      set_fact:
+        global_reboot_required: true
+
+  rescue:
+    - name: Add role to roles_failed
+      set_fact:
+        roles_failed: "{{ roles_failed + ['cpu_config: Disable C-states'] }}"
