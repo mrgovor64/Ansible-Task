@@ -32,4 +32,4 @@
 # Mark for reboot
 - name: Mark system for reboot
   set_fact:
-    reboot_required: true
+    global_reboot_required: true

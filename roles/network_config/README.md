@@ -19,7 +19,7 @@ This Ansible role detects the active network interface, renames it, updates the 
 | Variable | Default Value | Description |
 |----------|---------------|-------------|
 | `new_name_net_interface` | `net0` | The new name for the network interface. |
-| `reboot_required` | `true` | Marks system for reboot after renaming the interface. |
+| `global_reboot_required` | `true` | Marks system for reboot after renaming the interface. |
 | `network_config_applied` | `false` | Internal flag to track if configuration was applied. |
 
 
@@ -43,7 +43,7 @@ roles/
   hosts: all
   become: true
   vars:
-    reboot_required: false
+    global_reboot_required: false
   roles:
     - network_config
 
@@ -51,7 +51,7 @@ roles/
     - name: Server reboot
       reboot:
         reboot_timeout: 300
-      when: reboot_required | bool
+      when: global_reboot_required | bool
 ```
 
 ## How It Works
