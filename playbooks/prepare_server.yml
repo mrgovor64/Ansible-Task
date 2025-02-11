@@ -28,7 +28,6 @@
     - name: Generate roles_successful list
       set_fact:
         roles_successful: "{{ roles_all | difference(roles_failed) }}"
-      no_log: true
 
     - name: Show summary of executed roles
       debug:

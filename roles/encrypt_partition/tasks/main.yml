@@ -39,15 +39,12 @@
         mode: "0400"
         owner: root
         group: root
-      # no_log: true
 
     - name: Encrypt partition with LUKS
       command: cryptsetup luksFormat --batch-mode --key-file={{ luks_key_path }} {{ encrypt_partition__partition_name }}
-      # no_log: true
 
     - name: Open LUKS container
       command: cryptsetup open --key-file={{ luks_key_path }} {{ encrypt_partition__partition_name }} encrypted_{{ encrypt_partition__partition_name | basename }}
-      # no_log: true
 
     - name: Get UUID of encrypted partition
       command: blkid -s UUID -o value {{ encrypt_partition__partition_name }}
