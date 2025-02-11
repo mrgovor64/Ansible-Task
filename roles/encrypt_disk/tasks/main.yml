@@ -1,0 +1,82 @@
+---
+# Init of roles list
+- name: Adding role to roles list
+  set_fact:
+    roles_all: "{{ roles_all + ['encrypt_disk'] }}"
+
+  # Encrypt the disk
+- name: Encrypt the disk
+  block:
+    - name: Check if disk exists
+      stat:
+        path: "{{ encrypt_disk_device_name }}"
+      register: disk_stat
+      failed_when: not disk_stat.stat.exists
+
+    - name: Check if disk is already encrypted
+      command: "lsblk -o NAME,FSTYPE {{ encrypt_disk_device_name }}"
+      register: disk_info
+      changed_when: false
+
+    - name: Fail if disk is already encrypted
+      fail:
+        msg:
+          - "Disk is already encrypted"
+      when: "disk_info.stdout is defined and 'crypto_LUKS' in disk_info.stdout"
+
+    - name: Ensure LUKS key file exists
+      copy:
+        dest: "/etc/luks.key"
+        content: "{{ encrypt_disk_luks_password }}"
+        mode: "0400"
+        owner: root
+        group: root
+      no_log: true
+
+    - name: Create LUKS partition with key file
+      command: cryptsetup luksFormat --batch-mode --key-file=/etc/luks.key {{ encrypt_disk_device_name }}
+      no_log: true
+
+    - name: Open LUKS container with key file
+      command: cryptsetup open --key-file=/etc/luks.key {{ encrypt_disk_device_name }} {{ encrypt_disk_part_name }}
+      no_log: true
+
+    - name: Create filesystem on encrypted disk
+      command: mkfs.ext4 /dev/mapper/{{ encrypt_disk_part_name }}
+
+    - name: Create mount point
+      file:
+        path: "{{ encrypt_disk_mount_point }}"
+        state: directory
+
+    - name: Mount encrypted disk
+      mount:
+        path: "{{ encrypt_disk_mount_point }}"
+        src: "/dev/mapper/{{ encrypt_disk_part_name }}"
+        fstype: ext4
+        state: mounted
+
+    - name: Mark reboot required
+      set_fact:
+        global_reboot_required: true
+
+    - name: Get UUID of encrypted disk
+      command: blkid -s UUID -o value {{ encrypt_disk_device_name }}
+      register: disk_uuid
+      changed_when: false
+
+    - name: Update /etc/crypttab
+      lineinfile:
+        path: /etc/crypttab
+        line: "{{ encrypt_disk_part_name }} UUID={{ disk_uuid.stdout }} /etc/luks.key luks"
+        create: true
+
+    - name: Update /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        line: "/dev/mapper/{{ encrypt_disk_part_name }} {{ encrypt_disk_mount_point }} ext4 defaults 0 2"
+        create: true
+  rescue:
+    - name: Add role to roles_failed
+      set_fact:
+        roles_failed: "{{ roles_failed + ['encrypt_disk'] }}"
