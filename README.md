@@ -22,7 +22,7 @@ This Ansible playbook automates the preparation of a server by applying multiple
   - Required roles (`encrypt_disk`, `encrypt_partition`, `cpu_config`, `network_config`, `cpu_info`).
 
 ## Inventory Configuration
-The `hosts.yml` file should define the target servers and required variables. Example:
+The `inventory/hosts.yml` file should define the target servers and required variables. Example:
 
 ```yaml
 all:
