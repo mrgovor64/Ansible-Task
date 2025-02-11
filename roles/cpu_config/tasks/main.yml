@@ -39,6 +39,17 @@
 # Disable C-states
 - name: Disable C-states
   block:
+    - name: Check if C-states are already disabled
+      command: grep 'intel_idle.max_cstate=0 processor.max_cstate=0' /etc/default/grub
+      register: cstates_check
+      changed_when: false
+      failed_when: false
+
+    - name: Fail if C-states are already disabled
+      fail:
+        msg: "ERROR: C-states are already disabled in GRUB!"
+      when: cstates_check.rc == 0
+
     - name: Disable C-states permanently
       replace:
         path: /etc/default/grub
