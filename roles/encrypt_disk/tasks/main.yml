@@ -9,12 +9,12 @@
   block:
     - name: Check if disk exists
       stat:
-        path: "{{ encrypt_disk_device_name }}"
+        path: "{{ encrypt_disk__disk_name }}"
       register: disk_stat
       failed_when: not disk_stat.stat.exists
 
     - name: Check if disk is already encrypted
-      command: "lsblk -o NAME,FSTYPE {{ encrypt_disk_device_name }}"
+      command: "lsblk -o NAME,FSTYPE {{ encrypt_disk__disk_name }}"
       register: disk_info
       changed_when: false
 
@@ -24,35 +24,36 @@
           - "Disk is already encrypted"
       when: "disk_info.stdout is defined and 'crypto_LUKS' in disk_info.stdout"
 
+    - name: Define LUKS key path
+      set_fact:
+        luks_key_path: "/etc/luks-{{ encrypt_disk__partition_name }}.key"
+
     - name: Ensure LUKS key file exists
       copy:
-        dest: "/etc/luks.key"
-        content: "{{ encrypt_disk_luks_password }}"
+        dest: "{{ luks_key_path }}"
+        content: "{{ encrypt_disk__luks_password }}"
         mode: "0400"
         owner: root
         group: root
-      no_log: true
 
     - name: Create LUKS partition with key file
-      command: cryptsetup luksFormat --batch-mode --key-file=/etc/luks.key {{ encrypt_disk_device_name }}
-      no_log: true
+      command: cryptsetup luksFormat --batch-mode --key-file={{ luks_key_path }} {{ encrypt_disk__disk_name }}
 
     - name: Open LUKS container with key file
-      command: cryptsetup open --key-file=/etc/luks.key {{ encrypt_disk_device_name }} {{ encrypt_disk_part_name }}
-      no_log: true
+      command: cryptsetup open --key-file={{ luks_key_path }} {{ encrypt_disk__disk_name }} {{ encrypt_disk__partition_name }}
 
     - name: Create filesystem on encrypted disk
-      command: mkfs.ext4 /dev/mapper/{{ encrypt_disk_part_name }}
+      command: mkfs.ext4 /dev/mapper/{{ encrypt_disk__partition_name }}
 
     - name: Create mount point
       file:
-        path: "{{ encrypt_disk_mount_point }}"
+        path: "{{ encrypt_disk__mount_point }}"
         state: directory
 
     - name: Mount encrypted disk
       mount:
-        path: "{{ encrypt_disk_mount_point }}"
-        src: "/dev/mapper/{{ encrypt_disk_part_name }}"
+        path: "{{ encrypt_disk__mount_point }}"
+        src: "/dev/mapper/{{ encrypt_disk__partition_name }}"
         fstype: ext4
         state: mounted
 
@@ -61,20 +62,20 @@
         global_reboot_required: true
 
     - name: Get UUID of encrypted disk
-      command: blkid -s UUID -o value {{ encrypt_disk_device_name }}
+      command: blkid -s UUID -o value {{ encrypt_disk__disk_name }}
       register: disk_uuid
       changed_when: false
 
     - name: Update /etc/crypttab
       lineinfile:
         path: /etc/crypttab
-        line: "{{ encrypt_disk_part_name }} UUID={{ disk_uuid.stdout }} /etc/luks.key luks"
+        line: "{{ encrypt_disk__partition_name }} UUID={{ disk_uuid.stdout }} {{ luks_key_path }} luks"
         create: true
 
     - name: Update /etc/fstab
       lineinfile:
         path: /etc/fstab
-        line: "/dev/mapper/{{ encrypt_disk_part_name }} {{ encrypt_disk_mount_point }} ext4 defaults 0 2"
+        line: "/dev/mapper/{{ encrypt_disk__partition_name }} {{ encrypt_disk__mount_point }} ext4 defaults 0 2"
         create: true
   rescue:
     - name: Add role to roles_failed
