@@ -1,0 +1,70 @@
+---
+# Init of roles list
+- name: Adding role to roles list
+  set_fact:
+    roles_all: "{{ roles_all + ['encrypt_partition'] }}"
+
+# Encrypt the partition
+- name: Encrypt the partition
+  block:
+    - name: Check if partition exists
+      stat:
+        path: "{{ encrypt_partition__partition_name }}"
+      register: partition_stat
+      changed_when: false
+
+    - name: Fail if partition does not exist
+      fail:
+        msg: "Partition {{ encrypt_partition__partition_name }} does not exist!"
+      when: not partition_stat.stat.exists
+
+    - name: Get partition filesystem type
+      command: "lsblk -no FSTYPE {{ encrypt_partition__partition_name }}"
+      register: partition_fs
+      changed_when: false
+
+    - name: Fail if partition is already encrypted
+      fail:
+        msg: "Partition {{ encrypt_partition__partition_name }} is already encrypted!"
+      when: "'crypto_LUKS' in partition_fs.stdout"
+
+    - name: Define LUKS key path
+      set_fact:
+        luks_key_path: "/etc/luks-{{ encrypt_partition__partition_name | basename }}.key"
+
+    - name: Ensure LUKS key file exists
+      copy:
+        dest: "{{ luks_key_path }}"
+        content: "{{ encrypt_partition__luks_password }}"
+        mode: "0400"
+        owner: root
+        group: root
+      # no_log: true
+
+    - name: Encrypt partition with LUKS
+      command: cryptsetup luksFormat --batch-mode --key-file={{ luks_key_path }} {{ encrypt_partition__partition_name }}
+      # no_log: true
+
+    - name: Open LUKS container
+      command: cryptsetup open --key-file={{ luks_key_path }} {{ encrypt_partition__partition_name }} encrypted_{{ encrypt_partition__partition_name | basename }}
+      # no_log: true
+
+    - name: Get UUID of encrypted partition
+      command: blkid -s UUID -o value {{ encrypt_partition__partition_name }}
+      register: partition_uuid
+      changed_when: false
+
+    - name: Update /etc/crypttab
+      lineinfile:
+        path: /etc/crypttab
+        line: "encrypted_{{ encrypt_partition__partition_name | basename }} UUID={{ partition_uuid.stdout }} {{ luks_key_path }} luks"
+        create: true
+
+    - name: Mark reboot required
+      set_fact:
+        global_reboot_required: true
+
+  rescue:
+    - name: Add role to roles_failed
+      set_fact:
+        roles_failed: "{{ roles_failed + ['encrypt_partition'] }}"
