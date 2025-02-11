@@ -1,20 +1,31 @@
 # CPU Info Role
 
 ## Description
-This role gathers and displays CPU-related information from the target system. It checks for key CPU details and identifies whether Hyper-Threading (for Intel CPUs) or SMT (Simultaneous Multithreading for AMD CPUs) is enabled. Additionally, it provides clear diagnostics if the SMT status file is missing, with possible causes and recommendations.
+This Ansible role gathers and displays CPU-related information from the target system. It checks for key CPU details and determines whether Hyper-Threading (for Intel CPUs) or Simultaneous Multithreading (SMT for AMD CPUs) is enabled. Additionally, it provides diagnostics if the SMT status file is missing, offering possible causes and recommendations.
 
 ## Features
 - Collects CPU information using the `lscpu` command.
 - Checks for the existence of the SMT status file: `/sys/devices/system/cpu/smt/active`.
 - Displays whether Hyper-Threading (Intel) or SMT (AMD) is enabled or disabled.
-- Provides detailed error messages if the SMT file is missing, with reasons and potential fixes.
+- Provides detailed error messages if the SMT file is missing, with reasons and potential solutions.
 
 ## Requirements
-- **Ansible Version**: 2.18.2 (development and testing conducted on this version)
+- **Ansible Version**: 2.18.2 (Development and testing conducted on this version)
 - **Supported Platforms**:
-  - Ubuntu 24.04.1 (tested and verified)
+  - Ubuntu 24.04.1 (Tested and verified)
+- **Dependencies**:
+  - The `lscpu` command must be available on the target system.
+  - The role must be executed with `become: true` to access system-level files.
 
-## Example Playbook
+## Role Variables
+This role uses the following variables to track execution status:
+- `roles_all`: A list containing all roles that were executed.
+- `roles_failed`: A list containing roles that encountered an error during execution.
+
+These variables are useful for tracking execution results at the end of a playbook, allowing users to see which roles ran successfully and which ones failed.
+
+## Usage
+Include this role in your playbook as follows:
 
 ```yaml
 - name: Run CPU Info Role
@@ -61,14 +72,21 @@ fatal: [server1]: FAILED! => {
 }
 ```
 
-## Notes
-- Ensure the target machine has `lscpu` installed.
-- Run the role with `become: true` to access system-level files.
-- Ensure the system has proper permissions to access `/sys/devices/system/cpu/smt/active`.
-- Some older CPUs or custom Linux kernels might not support SMT/Hyper-Threading or lack the corresponding file.
+## Troubleshooting
+- Ensure that the `lscpu` command is installed on the target system.
+- Verify that the role is executed with `become: true` to avoid permission issues.
+- If the SMT file is missing, check BIOS settings and kernel parameters.
+- Some older CPUs or custom Linux kernels may not support SMT/Hyper-Threading.
+
+## Extending the Role
+If you need to extend this role, consider adding tasks for:
+- Checking additional CPU features (e.g., virtualization support).
+- Logging results to an external system.
+- Customizable thresholds and alerts.
+
+## License
+MIT License
 
 ## Author
 Maintained by Vladimir Govorukhin
 
-## License
-MIT License

@@ -1,75 +1,60 @@
 # Network Configuration Role
 
-## Overview
-This Ansible role detects the active network interface, renames it, updates the network configuration (currently for Ubuntu using Netplan), and marks the system for reboot if necessary. If the role cannot apply any configuration (due to an unsupported OS or version), it will fail gracefully without stopping the entire playbook.
+## Description
+This Ansible role renames the active network interface and updates the Netplan configuration for Ubuntu-based systems. The role ensures that the new network interface name is applied correctly and marks the system for reboot if required.
 
 ## Features
-- **Detects the current network interface** used for internet access.
-- **Renames the interface** to a specified name (default: `net0`).
-- **Updates Netplan configuration** for Ubuntu-based systems (18.04+).
-- **Marks the system for reboot** if necessary.
-- **Fails gracefully** if no matching configuration is found.
+- Detects the active network interface.
+- Renames the network interface if necessary.
+- Updates and applies Netplan configuration for Ubuntu 18.04 and later.
+- Provides debug output of the new network interface settings.
+- Tracks execution success and failures for troubleshooting.
 
 ## Requirements
-- Ansible 2.18.2+
-- Ubuntu 18.04+ (Netplan-based networking)
-- System must support `ip route` and `netplan apply` commands
+- **Ansible Version**: Ensure that Ansible is installed on the control node.
+- **Supported Platforms**: Ubuntu 18.04+ (Tested on Ubuntu-based systems).
+- **Dependencies**:
+  - SSH access to the target server.
+  - The target server must allow Ansible to run with elevated privileges (`become: true`).
+  - Netplan must be available for configuration changes.
 
 ## Role Variables
-| Variable | Default Value | Description |
-|----------|---------------|-------------|
-| `new_name_net_interface` | `net0` | The new name for the network interface. |
-| `global_reboot_required` | `true` | Marks system for reboot after renaming the interface. |
-| `network_config_applied` | `false` | Internal flag to track if configuration was applied. |
-
-
-## File Structure
-```
-roles/
-  network_config/
-    tasks/
-      main.yml
-      update_and_apply_config.yml
-    templates/
-      netplan.yaml.j2
-    defaults/
-      main.yml
-```
+- `new_name_net_interface`: The new name to assign to the network interface (default: `net0`).
 
 ## Usage
-### Example Playbook
+Include this role in your playbook as follows:
+
 ```yaml
-- name: Configure network
+- name: Configure network interface
   hosts: all
   become: true
-  vars:
-    global_reboot_required: false
   roles:
-    - network_config
-
-  post_tasks:
-    - name: Server reboot
-      reboot:
-        reboot_timeout: 300
-      when: global_reboot_required | bool
+    - role: network_config
 ```
 
-## How It Works
-1. **Detects the active network interface** using `ip route`.
-2. **Renames the interface** to `net0` (or custom name from `new_name_net_interface`).
-3. **Updates and applies Netplan configuration** for Ubuntu systems.
-4. **Displays network information** after changes.
-5. **Marks the system for reboot** to ensure persistent changes.
+## Execution Flow
+### Network Interface Renaming:
+1. Detects the active network interface.
+2. Compares the detected interface name with `new_name_net_interface`.
+3. If the name is different, updates and applies Netplan configuration.
+4. Displays information about the renamed network interface.
+5. Marks the system for reboot if required.
 
-## Applying Changes
-After running this role, if the network interface was renamed, a reboot will be required. You can apply the changes by running:
+## Role Execution Tracking
+This role maintains two lists to track execution:
+- `roles_all`: Contains all executed tasks.
+- `roles_failed`: Lists tasks that encountered errors.
+- If any step fails, the failure is recorded, allowing for easier troubleshooting.
 
-## Future Improvements
-- Support for multiple Linux distributions (e.g., Debian, RHEL, CentOS)
-- Extend configuration handling for `systemd-networkd` and `ifupdown`
+## Troubleshooting
+- Ensure the system is running Ubuntu 18.04 or later before executing this role.
+- Verify that Ansible has `become` privileges to modify `/etc/netplan/`.
+- If network settings do not apply, check the generated Netplan configuration at `/etc/netplan/50-cloud-init.yaml`.
+- A reboot is required for the new network settings to fully take effect.
+
+## License
+MIT License
 
 ## Author
 Maintained by Vladimir Govorukhin
 
-## License
-MIT License
