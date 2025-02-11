@@ -10,20 +10,22 @@
     - vault.yml
   roles:
     - encrypt_disk
+    - encrypt_partition
     - cpu_config
     - network_config
 
   post_tasks:
     - name: Reboot the server if required
       reboot:
-        reboot_timeout: 300
+        reboot_timeout: 600
       when: global_reboot_required | bool
+      changed_when: false
 
     - name: Run cpu_info role
       include_role:
         name: cpu_info
 
-    - name: Generate roles_successful
+    - name: Generate roles_successful list
       set_fact:
         roles_successful: "{{ roles_all | difference(roles_failed) }}"
       no_log: true
