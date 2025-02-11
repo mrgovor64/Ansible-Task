@@ -6,11 +6,12 @@
     global_reboot_required: false
     roles_all: []
     roles_failed: []
+  vars_files:
+    - vault.yml
   roles:
-    # - encrypt_disk
+    - encrypt_disk
     - cpu_config
-    # - cpu_info
-    # - network_config
+    - network_config
 
   post_tasks:
     - name: Reboot the server if required
@@ -18,13 +19,19 @@
         reboot_timeout: 300
       when: global_reboot_required | bool
 
-    - name: Generate roles_succesful
+    - name: Run cpu_info role
+      include_role:
+        name: cpu_info
+
+    - name: Generate roles_successful
       set_fact:
-        roles_succesful: "{{ roles_all | difference(roles_failed) }}"
+        roles_successful: "{{ roles_all | difference(roles_failed) }}"
       no_log: true
 
     - name: Show summary of executed roles
       debug:
-        msg:
-          - "Successful Roles: {{ roles_succesful | join(', ') if roles_succesful else 'None' }}"
-          - "Failed Roles: {{ roles_failed | join(', ') if roles_failed else 'None' }}"
+        msg: "{{ ['✅ Successful Roles:'] + roles_successful}}"
+
+    - name: Show summary of executed roles
+      debug:
+        msg: "{{ ['❌ Failed Roles:'] + roles_failed}}"
