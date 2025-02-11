@@ -1,5 +1,3 @@
 global_reboot_required: false
 roles_all: []
 roles_failed: []
-
-new_name_net_interface: "net0"
