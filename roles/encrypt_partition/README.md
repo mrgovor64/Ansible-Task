@@ -14,6 +14,11 @@ This Ansible role encrypts a specified partition using LUKS, ensuring secure dat
 ## **⚠️ Warning**
 Encrypting a partition will erase all existing data on it. This script should only be executed on a partition that does not contain important data.
 
+## Additional Considerations
+- The partition to be encrypted must be sufficiently large (at least 20 MB recommended).
+- The partition must not be in use by other processes at the time of encryption.
+- Future updates to this role may introduce support for more flexible partition handling, including live encryption capabilities.
+
 ## Requirements
 - **Ansible Version**: Ensure that Ansible is installed on the control node.
 - **Supported Platforms**: Tested on Debian-based systems (Ubuntu, Debian).
@@ -25,6 +30,7 @@ Encrypting a partition will erase all existing data on it. This script should on
 ## Role Variables
 - `encrypt_partition__partition_name`: The partition to be encrypted (e.g., `/dev/xvda14`).
 - `encrypt_partition__luks_password`: The LUKS passphrase for encryption (should be stored securely, e.g., in Ansible Vault).
+- `global_reboot_required`: A flag indicating whether a system reboot is necessary after encryption.
 
 ## Usage
 Include this role in your playbook as follows:
