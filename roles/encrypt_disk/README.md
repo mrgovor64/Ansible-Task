@@ -24,6 +24,9 @@ Encrypting a disk will erase all existing data on it. This script should only be
   - The target server must allow Ansible to run with elevated privileges (`become: true`).
   - `cryptsetup` package must be installed.
 
+## Reboot Requirement
+This role sets the playbook variable global_reboot_required to true, which triggers a server reboot after all roles are executed. If you use this role in a playbook that does not include a global reboot mechanism, ensure that the server is manually rebooted after execution.
+
 ## Role Variables
 - `encrypt_disk__disk_name`: The disk device to be encrypted (e.g., `/dev/xvdb`).
 - `encrypt_disk__partition_name`: The name of the LUKS container.
@@ -52,12 +55,6 @@ Include this role in your playbook as follows:
 7. Creates and mounts the disk at the specified location.
 8. Updates `/etc/crypttab` and `/etc/fstab` for persistence.
 9. Marks the system for reboot if required.
-
-## Role Execution Tracking
-This role maintains two lists to track execution:
-- `roles_all`: Contains all executed tasks.
-- `roles_failed`: Lists tasks that encountered errors.
-- If any step fails, the failure is recorded, allowing for easier troubleshooting.
 
 ## Troubleshooting
 - Ensure the target disk exists and is not already encrypted.

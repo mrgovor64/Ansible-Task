@@ -65,20 +65,13 @@ ansible-playbook playbooks/prepare_server.yml --ask-vault-pass
 - **network_config**: Configures network settings.
 - **cpu_info**: Gathers CPU information.
 
+## Playbook Variables
+- `global_reboot_required`: A boolean flag that indicates if a system reboot is needed based on executed roles.
+
 ### Execution Flow:
 1. Runs each role sequentially.
-2. If any role fails, it is added to the `roles_failed` list.
-3. If a global reboot is required, the server reboots before continuing.
+2. If a global reboot is required, the server reboots before continuing.
    - The playbook uses the `global_reboot_required` variable to determine whether a reboot is needed. Roles that require a system reboot set this variable to `true`.
-4. Generates a list of successfully executed roles.
-5. Displays a summary of successful and failed roles.
-
-## Role Execution Tracking
-This playbook maintains two lists to track role execution:
-- `roles_all`: Contains all executed roles.
-- `roles_failed`: Lists roles that encountered errors.
-- `roles_successful`: Automatically calculated as roles that executed without failure.
-- `global_reboot_required`: A boolean flag that indicates if a system reboot is needed based on executed roles.
 
 These lists help administrators quickly assess the playbook's execution outcome and understand if a reboot is necessary.
 

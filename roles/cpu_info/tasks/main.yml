@@ -1,9 +1,5 @@
 ---
-# Init of roles list
-- name: Adding role to roles list
-  set_fact:
-    roles_all: "{{ roles_all + ['cpu_info: Gather CPU information','cpu_info: Get SMT status'] }}"
-
+# Gather CPU information
 - name: Gather CPU information
   block:
     - name: Gather CPU information
@@ -15,9 +11,10 @@
       debug:
         msg: "{{ cpu_info.stdout_lines }}"
   rescue:
-    - name: Add role to roles_failed
-      set_fact:
-        roles_failed: "{{ roles_failed + ['cpu_info: Gather CPU information'] }}"
+    - name: Show error
+      fail:
+        msg: "Stage 'cpu_info: Gather CPU information' couldn't be passed"
+      ignore_errors: true
 
 - name: Get SMT status
   block:
@@ -47,6 +44,7 @@
       debug:
         msg: "Hyper-Threading / SMT is {{ 'enabled' if smt_status.stdout == '1' else 'disabled' }}"
   rescue:
-    - name: Add role to roles_failed
-      set_fact:
-        roles_failed: "{{ roles_failed + ['cpu_info: Get SMT status'] }}"
+    - name: Show error
+      fail:
+        msg: "Stage 'cpu_info: Get SMT status' couldn't be passed"
+      ignore_errors: true

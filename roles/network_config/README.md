@@ -18,6 +18,9 @@ This Ansible role renames the active network interface and updates the Netplan c
   - The target server must allow Ansible to run with elevated privileges (`become: true`).
   - Netplan must be available for configuration changes.
 
+## Reboot Requirement
+This role sets the playbook variable global_reboot_required to true, which triggers a server reboot after all roles are executed. If you use this role in a playbook that does not include a global reboot mechanism, ensure that the server is manually rebooted after execution.
+
 ## Role Variables
 - `new_name_net_interface`: The new name to assign to the network interface (default: `net0`).
 
@@ -40,11 +43,6 @@ Include this role in your playbook as follows:
 4. Displays information about the renamed network interface.
 5. Marks the system for reboot if required.
 
-## Role Execution Tracking
-This role maintains two lists to track execution:
-- `roles_all`: Contains all executed tasks.
-- `roles_failed`: Lists tasks that encountered errors.
-- If any step fails, the failure is recorded, allowing for easier troubleshooting.
 
 ## Troubleshooting
 - Ensure the system is running Ubuntu 18.04 or later before executing this role.

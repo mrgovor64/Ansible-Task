@@ -1,9 +1,4 @@
 ---
-# Init of roles list
-- name: Adding role to roles list
-  set_fact:
-    roles_all: "{{ roles_all + ['network_config'] }}"
-
 - name: change network interface name
   block:
     # Detect active network interface
@@ -42,6 +37,7 @@
         global_reboot_required: true
 
   rescue:
-    - name: Add role to roles_failed
-      set_fact:
-        roles_failed: "{{ roles_failed + ['network_config'] }}"
+    - name: Show error
+      fail:
+        msg: "Stage 'network_config' couldn't be passed"
+      ignore_errors: true

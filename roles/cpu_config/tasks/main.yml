@@ -1,9 +1,4 @@
 ---
-# Init of roles list
-- name: Adding role to roles list
-  set_fact:
-    roles_all: "{{ roles_all + ['cpu_config: Frequency scaling', 'cpu_config: Disable C-states'] }}"
-
 # Frequency scaling
 - name: Frequency scaling
   block:
@@ -32,9 +27,10 @@
       set_fact:
         global_reboot_required: true
   rescue:
-    - name: Add role to roles_failed
-      set_fact:
-        roles_failed: "{{ roles_failed + ['cpu_config: Frequency scaling'] }}"
+    - name: Show error
+      fail:
+        msg: "Stage 'cpu_config: Frequency scaling' couldn't be passed"
+      ignore_errors: true
 
 # Disable C-states
 - name: Disable C-states
@@ -65,6 +61,7 @@
       set_fact:
         global_reboot_required: true
   rescue:
-    - name: Add role to roles_failed
-      set_fact:
-        roles_failed: "{{ roles_failed + ['cpu_config: Disable C-states'] }}"
+    - name: Show error
+      fail:
+        msg: "Stage 'cpu_config: Disable C-states' couldn't be passed"
+      ignore_errors: true

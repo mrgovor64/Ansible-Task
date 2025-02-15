@@ -27,10 +27,12 @@ Encrypting a partition will erase all existing data on it. This script should on
   - The target server must allow Ansible to run with elevated privileges (`become: true`).
   - `cryptsetup` package must be installed.
 
+## Reboot Requirement
+This role sets the playbook variable global_reboot_required to true, which triggers a server reboot after all roles are executed. If you use this role in a playbook that does not include a global reboot mechanism, ensure that the server is manually rebooted after execution.
+
 ## Role Variables
 - `encrypt_partition__partition_name`: The partition to be encrypted (e.g., `/dev/xvda14`).
 - `encrypt_partition__luks_password`: The LUKS passphrase for encryption (should be stored securely, e.g., in Ansible Vault).
-- `global_reboot_required`: A flag indicating whether a system reboot is necessary after encryption.
 
 ## Usage
 Include this role in your playbook as follows:
@@ -53,12 +55,6 @@ Include this role in your playbook as follows:
 6. Retrieves the UUID of the encrypted partition.
 7. Updates `/etc/crypttab` to ensure persistence.
 8. Marks the system for reboot if required.
-
-## Role Execution Tracking
-This role maintains two lists to track execution:
-- `roles_all`: Contains all executed tasks.
-- `roles_failed`: Lists tasks that encountered errors.
-- If any step fails, the failure is recorded, allowing for easier troubleshooting.
 
 ## Troubleshooting
 - Ensure the target partition exists and is not already encrypted.

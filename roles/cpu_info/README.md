@@ -17,11 +17,6 @@ This Ansible role gathers and displays CPU-related information from the target s
   - The `lscpu` command must be available on the target system.
   - The role must be executed with `become: true` to access system-level files.
 
-## Role Variables
-This role uses the following variables to track execution status:
-- `roles_all`: A list containing all roles that were executed.
-- `roles_failed`: A list containing roles that encountered an error during execution.
-
 These variables are useful for tracking execution results at the end of a playbook, allowing users to see which roles ran successfully and which ones failed.
 
 ## Usage

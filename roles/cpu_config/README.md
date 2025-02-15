@@ -19,6 +19,9 @@ This Ansible role configures CPU performance settings on a Linux system by enabl
   - The target server must allow Ansible to run with elevated privileges (`become: true`).
   - GRUB must be installed on the system to disable C-states.
 
+## Reboot Requirement
+This role sets the playbook variable global_reboot_required to true, which triggers a server reboot after all roles are executed. If you use this role in a playbook that does not include a global reboot mechanism, ensure that the server is manually rebooted after execution.
+
 ## Usage
 Include this role in your playbook as follows:
 
@@ -42,12 +45,6 @@ Include this role in your playbook as follows:
 2. Updates the GRUB configuration to disable C-states.
 3. Runs `update-grub` (for Debian-based systems).
 4. Marks the system for reboot if needed.
-
-## Role Execution Tracking
-This role maintains two lists to track execution:
-- `roles_all`: Contains all executed tasks.
-- `roles_failed`: Lists tasks that encountered errors.
-- If any step fails, the failure is recorded, allowing for easier troubleshooting.
 
 ## Troubleshooting
 - Ensure the system supports CPU frequency scaling before running this role.

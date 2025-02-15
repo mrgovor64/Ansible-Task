@@ -1,9 +1,4 @@
 ---
-# Init of roles list
-- name: Adding role to roles list
-  set_fact:
-    roles_all: "{{ roles_all + ['encrypt_partition'] }}"
-
 # Encrypt the partition
 - name: Encrypt the partition
   block:
@@ -62,6 +57,7 @@
         global_reboot_required: true
 
   rescue:
-    - name: Add role to roles_failed
-      set_fact:
-        roles_failed: "{{ roles_failed + ['encrypt_partition'] }}"
+    - name: Show error
+      fail:
+        msg: "Stage 'encrypt_partition' couldn't be passed"
+      ignore_errors: true

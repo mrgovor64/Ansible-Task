@@ -1,10 +1,5 @@
 ---
-# Init of roles list
-- name: Adding role to roles list
-  set_fact:
-    roles_all: "{{ roles_all + ['encrypt_disk'] }}"
-
-  # Encrypt the disk
+# Encrypt the disk
 - name: Encrypt the disk
   block:
     - name: Check if disk exists
@@ -78,6 +73,7 @@
         line: "/dev/mapper/{{ encrypt_disk__partition_name }} {{ encrypt_disk__mount_point }} ext4 defaults 0 2"
         create: true
   rescue:
-    - name: Add role to roles_failed
-      set_fact:
-        roles_failed: "{{ roles_failed + ['encrypt_disk'] }}"
+    - name: Show error
+      fail:
+        msg: "Stage 'encrypt_disk' couldn't be passed"
+      ignore_errors: true
