@@ -88,4 +88,3 @@
     - name: Show error
       fail:
         msg: "Stage 'encrypt_disk' couldn't be passed"
-      ignore_errors: true

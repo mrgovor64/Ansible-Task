@@ -40,4 +40,3 @@
     - name: Show error
       fail:
         msg: "Stage 'network_config' couldn't be passed"
-      ignore_errors: true

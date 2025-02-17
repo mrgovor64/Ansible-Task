@@ -9,7 +9,8 @@
   roles:
     - encrypt_disk
     - encrypt_partition
-    - cpu_config
+    - cpu_frequency_scaling
+    - cpu_disable_cstates
     - network_config
 
   post_tasks:
