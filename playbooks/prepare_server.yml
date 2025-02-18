@@ -2,16 +2,17 @@
 - name: Server Preparation
   hosts: all
   become: true
+  any_errors_fatal: false
   vars:
     global_reboot_required: false
   vars_files:
     - vault.yml
   roles:
-    - encrypt_disk
-    - encrypt_partition
-    - cpu_frequency_scaling
-    - cpu_disable_cstates
-    - network_config
+    - { role: encrypt_luks_device, ignore_errors: true }
+    # - {role: encrypt_partition, ignore_errors: true}
+    - { role: cpu_frequency_scaling, ignore_errors: true }
+    - { role: cpu_disable_cstates, ignore_errors: true }
+    - { role: network_config, ignore_errors: true }
 
   post_tasks:
     - name: Reboot the server if required
