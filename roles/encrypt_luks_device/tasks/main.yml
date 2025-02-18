@@ -19,6 +19,11 @@
         msg: "Disk is already encrypted"
       when: luks_check.rc == 0
 
+    - name: Ensure cryptsetup is installed
+      package:
+        name: cryptsetup
+        state: present
+
     - name: Define LUKS key path
       set_fact:
         luks_key_path: "/etc/luks-{{ encrypt_luks_device__partition_name }}.key"
