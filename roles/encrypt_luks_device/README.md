@@ -1,4 +1,4 @@
-# Encrypt Disk Role
+# Encrypt Luks Device Role
 
 ## Description
 This Ansible role encrypts a specified disk using LUKS, creates a filesystem on it, and mounts it at a designated location. It ensures the encrypted disk is persistently available across reboots by updating `/etc/crypttab` and `/etc/fstab`.
@@ -28,10 +28,10 @@ Encrypting a disk will erase all existing data on it. This script should only be
 This role sets the playbook variable global_reboot_required to true, which triggers a server reboot after all roles are executed. If you use this role in a playbook that does not include a global reboot mechanism, ensure that the server is manually rebooted after execution.
 
 ## Role Variables
-- `encrypt_disk__disk_name`: The disk device to be encrypted (e.g., `/dev/xvdb`).
-- `encrypt_disk__partition_name`: The name of the LUKS container.
-- `encrypt_disk__mount_point`: The directory where the encrypted disk will be mounted.
-- `encrypt_disk__luks_password`: The LUKS passphrase for encryption (should be stored securely, e.g., in Ansible Vault).
+- `encrypt_luks_device__disk_name`: The disk device to be encrypted (e.g., `/dev/xvdb`).
+- `encrypt_luks_device__partition_name`: The name of the LUKS container.
+- `encrypt_luks_device__mount_point`: The directory where the encrypted disk will be mounted.
+- `encrypt_luks_device__luks_password`: The LUKS passphrase for encryption (should be stored securely, e.g., in Ansible Vault).
 
 ## Usage
 Include this role in your playbook as follows:
@@ -41,7 +41,7 @@ Include this role in your playbook as follows:
   hosts: all
   become: true
   roles:
-    - role: encrypt_disk
+    - role: encrypt_luks_device
 ```
 
 ## Execution Flow

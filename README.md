@@ -32,10 +32,10 @@ all:
       ansible_user: ubuntu # user name on the server
       ansible_ssh_private_key_file: ~/.ssh/PemKey.pem # link to private key 
 
-      encrypt_disk__disk_name: /dev/xvdb # disk name which has to be encrypted
-      encrypt_disk__partition_name: encrypted_xvdb # partition name, which will be created on the disk
-      encrypt_disk__mount_point: /newdisk # mount point of that partition
-      encrypt_disk__luks_password: !vault | # the encryption key (it is better to use the Ansible Vault file and not store it in repositories)
+      encrypt_luks_device__disk_name: /dev/xvdb # disk name which has to be encrypted
+      encrypt_luks_device__partition_name: encrypted_xvdb # partition name, which will be created on the disk
+      encrypt_luks_device__mount_point: /newdisk # mount point of that partition
+      encrypt_luks_device__luks_password: !vault | # the encryption key (it is better to use the Ansible Vault file and not store it in repositories)
         $ANSIBLE_VAULT;1.1;AES256
         66363133373437386239643830333135613364366438633662313638383939396636653734353364
         6330633634303738660a323636393139623263343738383630653562653032343838373030393834
