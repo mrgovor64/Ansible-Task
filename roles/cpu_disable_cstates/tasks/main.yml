@@ -31,3 +31,4 @@
     - name: Show error
       fail:
         msg: "Stage 'cpu_config: Disable C-states' couldn't be passed"
+      ignore_errors: true

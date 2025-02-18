@@ -60,3 +60,4 @@
     - name: Show error
       fail:
         msg: "Stage 'encrypt_partition' couldn't be passed"
+      ignore_errors: true

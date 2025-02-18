@@ -30,3 +30,4 @@
     - name: Show error
       fail:
         msg: "Stage 'cpu_config: Frequency scaling' couldn't be passed"
+      ignore_errors: true

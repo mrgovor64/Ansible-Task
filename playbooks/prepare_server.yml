@@ -8,11 +8,11 @@
   vars_files:
     - vault.yml
   roles:
-    - { role: encrypt_luks_device, ignore_errors: true }
-    # - {role: encrypt_partition, ignore_errors: true}
-    - { role: cpu_frequency_scaling, ignore_errors: true }
-    - { role: cpu_disable_cstates, ignore_errors: true }
-    - { role: network_config, ignore_errors: true }
+    - encrypt_luks_device
+    # - encrypt_partition
+    - cpu_frequency_scaling
+    - cpu_disable_cstates
+    - network_config
 
   post_tasks:
     - name: Reboot the server if required

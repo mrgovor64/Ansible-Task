@@ -93,3 +93,4 @@
     - name: Show error
       fail:
         msg: "Stage 'encrypt_luks_device' couldn't be passed"
+      ignore_errors: true
